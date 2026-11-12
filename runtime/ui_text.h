@@ -21,7 +21,7 @@ typedef enum {
     UI_MENU_AFTER_RESTART,    // note on a setting that is read at start
     UI_MENU_SET_BY_ENV,       // note on a setting an environment variable fixes
     UI_MENU_SAVE_FAILED,
-    UI_MENU_VERSION,          // "DKB Recomp %s, game %s": the port version and the game update, beside the title
+    UI_MENU_VERSION,          // "Yoshi Recomp %s, game %s": the port version and the game update, beside the title
 
     // Screen
     UI_MENU_FULLSCREEN, UI_MENU_FULLSCREEN_DESC,
@@ -113,7 +113,7 @@ typedef enum {
 
     // Menu tab
     UI_MENU_MENU_LANG, UI_MENU_MENU_LANG_DESC, UI_MENU_MENU_LANG_AUTO,
-    UI_MENU_THEME, UI_MENU_THEME_DESC, UI_MENU_THEME_DK, UI_MENU_THEME_CLASSIC,
+    UI_MENU_THEME, UI_MENU_THEME_DESC, UI_MENU_THEME_YOSHI, UI_MENU_THEME_CLASSIC,
 
     // Language names, each in its own language and the same in every row (game language and menu language lists)
     UI_MENU_LANGNAME_EN, UI_MENU_LANGNAME_JA, UI_MENU_LANGNAME_FR, UI_MENU_LANGNAME_DE, UI_MENU_LANGNAME_IT,

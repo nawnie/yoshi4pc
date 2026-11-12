@@ -20,7 +20,7 @@ extern const char *const movie_symbols[MOVIE_ENTRIES];
 // movie::MediaData methods, the vtable address the constructor stores (vtable + 0x10), and the original code of every
 // entry for decoders left to the library. Filled from the loaded modules at the first entry call, or by the probe.
 typedef struct {
-    uint64_t signal_event, buf_set_range, buf_set_data, buf_base, buf_capacity;
+    uint64_t signal_event, buf_set_range, buf_set_data, buf_base, buf_capacity, buf_nvn_sync;
     uint64_t md_find_int32, md_find_string, md_set_int32, md_set_rect, md_set_string;
     uint64_t vptr;
     uint64_t orig[MOVIE_ENTRIES];

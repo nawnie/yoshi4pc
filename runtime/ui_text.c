@@ -24,7 +24,7 @@ typedef struct { const char *lang; const char *const *text; } Row;
     [UI_SWKBD_CANCEL] = cancel, [UI_SWKBD_PAD_HINT] = hint, LANG_NAMES
 
 static const char *const text_en[UI_TEXT_COUNT] = {
-    SWKBD("Text entry", "Enter a name", "Horse", "OK", "Cancel", "Controller: A = OK, B = Cancel"),
+    SWKBD("Text entry", "Enter a name", "Yoshi", "OK", "Cancel", "Controller: A = OK, B = Cancel"),
 
     [UI_MENU_TITLE] = "Settings",
     [UI_MENU_TAB_SCREEN] = "Screen", [UI_MENU_TAB_GAME] = "Game", [UI_MENU_TAB_SOUND] = "Sound",
@@ -33,7 +33,7 @@ static const char *const text_en[UI_TEXT_COUNT] = {
     [UI_MENU_ON] = "On", [UI_MENU_OFF] = "Off", [UI_MENU_AUTO] = "Automatic", [UI_MENU_DEFAULT_MARK] = "default",
     [UI_MENU_AFTER_RESTART] = "after restart", [UI_MENU_SET_BY_ENV] = "set by environment variable",
     [UI_MENU_SAVE_FAILED] = "could not save settings",
-    [UI_MENU_VERSION] = "DKB Recomp %s, game %s",
+    [UI_MENU_VERSION] = "Yoshi Recomp %s, game %s",
 
     [UI_MENU_FULLSCREEN] = "Fullscreen", [UI_MENU_FULLSCREEN_DESC] = "Fills the screen with the game; F11 toggles it.",
     [UI_MENU_WINDOW_MODE] = "Window mode",
@@ -209,13 +209,13 @@ static const char *const text_en[UI_TEXT_COUNT] = {
     [UI_BIND_LSTICK_DOWN] = "Move back",
     [UI_BIND_RSTICK_LEFT] = "Camera left", [UI_BIND_RSTICK_UP] = "Camera up", [UI_BIND_RSTICK_RIGHT] = "Camera right",
     [UI_BIND_RSTICK_DOWN] = "Camera down",
-    [UI_BIND_DESC_A] = "Interact, pick up, talk.", [UI_BIND_DESC_B] = "Run, cancel, go back.",
-    [UI_BIND_DESC_X] = "Jump.", [UI_BIND_DESC_Y] = "Attack.", [UI_BIND_DESC_LCLICK] = "Crouch.",
-    [UI_BIND_DESC_RCLICK] = "First-person view.", [UI_BIND_DESC_L] = "Abilities.",
-    [UI_BIND_DESC_R] = "Throw a weapon.", [UI_BIND_DESC_ZL] = "Shield, lock on.", [UI_BIND_DESC_ZR] = "Bow.",
-    [UI_BIND_DESC_PLUS] = "Menu, inventory.", [UI_BIND_DESC_MINUS] = "Map.",
-    [UI_BIND_DESC_DPAD] = "Quick-select.",
-    [UI_BIND_DESC_MOVE] = "Moves Link like the left stick. The controller's left stick always works too.",
+    [UI_BIND_DESC_A] = "Confirm, interact.", [UI_BIND_DESC_B] = "Jump, cancel, go back.",
+    [UI_BIND_DESC_X] = "Action (X).", [UI_BIND_DESC_Y] = "Action (Y).", [UI_BIND_DESC_LCLICK] = "Left stick button.",
+    [UI_BIND_DESC_RCLICK] = "Right stick button.", [UI_BIND_DESC_L] = "Shoulder button L.",
+    [UI_BIND_DESC_R] = "Shoulder button R.", [UI_BIND_DESC_ZL] = "Trigger ZL.", [UI_BIND_DESC_ZR] = "Trigger ZR.",
+    [UI_BIND_DESC_PLUS] = "Pause, menu.", [UI_BIND_DESC_MINUS] = "Sub-menu.",
+    [UI_BIND_DESC_DPAD] = "D-pad.",
+    [UI_BIND_DESC_MOVE] = "Moves Yoshi like the left stick. The controller's left stick always works too.",
     [UI_BIND_DESC_CAMERA] = "Turns the camera like the right stick. The mouse and the controller's right stick always "
                             "work too.",
     [UI_KEY_SPACE] = "Space", [UI_KEY_TAB] = "Tab", [UI_KEY_LSHIFT] = "Left Shift", [UI_KEY_LCTRL] = "Left Ctrl",
@@ -238,8 +238,8 @@ static const char *const text_en[UI_TEXT_COUNT] = {
 
     [UI_MENU_MENU_LANG] = "Menu language", [UI_MENU_MENU_LANG_DESC] = "Language of this menu and the overlay.",
     [UI_MENU_MENU_LANG_AUTO] = "Automatic (from Windows)",
-    [UI_MENU_THEME] = "Menu theme", [UI_MENU_THEME_DK] = "Donkey Kong", [UI_MENU_THEME_CLASSIC] = "Classic",
-    [UI_MENU_THEME_DESC] = "Look of this menu: Donkey Kong (bark and banana yellow) or the classic dark green and gold.",
+    [UI_MENU_THEME] = "Menu theme", [UI_MENU_THEME_YOSHI] = "Yoshi", [UI_MENU_THEME_CLASSIC] = "Classic",
+    [UI_MENU_THEME_DESC] = "Look of this menu: Yoshi (storybook forest green and gold) or the classic look.",
 
     [UI_MENU_ADV_WARNING] = "These settings are for testing and troubleshooting. Change them only when you know why.",
     [UI_MENU_GROUP_SCHED] = "Scheduling", [UI_MENU_GROUP_SHADERS] = "Shaders and pipelines",
@@ -341,7 +341,7 @@ static const char *const text_en[UI_TEXT_COUNT] = {
 };
 
 static const char *const text_ru[UI_TEXT_COUNT] = {
-    SWKBD("Ввод текста", "Введите имя", "Лошадь", "ОК", "Отмена", "Контроллер: A — ОК, B — отмена"),
+    SWKBD("Ввод текста", "Введите имя", "Йоши", "ОК", "Отмена", "Контроллер: A — ОК, B — отмена"),
 
     [UI_MENU_TITLE] = "Настройки",
     [UI_MENU_TAB_SCREEN] = "Экран", [UI_MENU_TAB_GAME] = "Игра", [UI_MENU_TAB_SOUND] = "Звук",
@@ -351,7 +351,7 @@ static const char *const text_ru[UI_TEXT_COUNT] = {
     [UI_MENU_DEFAULT_MARK] = "по умолчанию",
     [UI_MENU_AFTER_RESTART] = "после перезапуска", [UI_MENU_SET_BY_ENV] = "задано переменной окружения",
     [UI_MENU_SAVE_FAILED] = "не удалось сохранить настройки",
-    [UI_MENU_VERSION] = "DKB Recomp %s, игра %s",
+    [UI_MENU_VERSION] = "Yoshi Recomp %s, игра %s",
 
     [UI_MENU_FULLSCREEN] = "Полный экран", [UI_MENU_FULLSCREEN_DESC] = "Игра на весь экран; F11 переключает режим.",
     [UI_MENU_WINDOW_MODE] = "Режим окна",
@@ -501,6 +501,10 @@ static const char *const text_ru[UI_TEXT_COUNT] = {
     [UI_MENU_PAD_LAYOUT_PROMPTS_RESTART] = "подсказки сменятся после перезапуска",
     [UI_MENU_STICK_DEADZONE] = "Мёртвая зона стиков",
     [UI_MENU_STICK_DEADZONE_DESC] = "Насколько нужно отклонить стик геймпада, чтобы игра это заметила. Увеличьте, если персонаж или камера двигаются сами.",
+    [UI_MENU_MOUSE_CAMERA] = "Прямая камера мышью",
+    [UI_MENU_MOUSE_CAMERA_DESC] = "Поворачивает обычную камеру следования напрямую движением мыши, без ускорения и "
+                                  "сглаживания контроллера. Остальные режимы камеры используют ввод как с контроллера. "
+                                  "Выключение возвращает ввод в стиле контроллера везде.",
     [UI_MENU_MOUSE_SENS] = "Чувствительность мыши",
     [UI_MENU_MOUSE_SENS_DESC] = "Как быстро мышь поворачивает камеру.",
 
@@ -526,13 +530,13 @@ static const char *const text_ru[UI_TEXT_COUNT] = {
     [UI_BIND_LSTICK_DOWN] = "Назад",
     [UI_BIND_RSTICK_LEFT] = "Камера влево", [UI_BIND_RSTICK_UP] = "Камера вверх",
     [UI_BIND_RSTICK_RIGHT] = "Камера вправо", [UI_BIND_RSTICK_DOWN] = "Камера вниз",
-    [UI_BIND_DESC_A] = "Взаимодействие, подобрать, поговорить.", [UI_BIND_DESC_B] = "Бег, отмена, назад.",
-    [UI_BIND_DESC_X] = "Прыжок.", [UI_BIND_DESC_Y] = "Атака.", [UI_BIND_DESC_LCLICK] = "Присесть.",
-    [UI_BIND_DESC_RCLICK] = "Вид от первого лица.", [UI_BIND_DESC_L] = "Способности.",
-    [UI_BIND_DESC_R] = "Бросок оружия.", [UI_BIND_DESC_ZL] = "Щит, захват цели.", [UI_BIND_DESC_ZR] = "Лук.",
-    [UI_BIND_DESC_PLUS] = "Меню, инвентарь.", [UI_BIND_DESC_MINUS] = "Карта.",
-    [UI_BIND_DESC_DPAD] = "Быстрый выбор.",
-    [UI_BIND_DESC_MOVE] = "Двигает Линка, как левый стик. Левый стик контроллера тоже всегда работает.",
+    [UI_BIND_DESC_A] = "Подтвердить, взаимодействие.", [UI_BIND_DESC_B] = "Прыжок, отмена, назад.",
+    [UI_BIND_DESC_X] = "Действие (X).", [UI_BIND_DESC_Y] = "Действие (Y).", [UI_BIND_DESC_LCLICK] = "Нажатие левого стика.",
+    [UI_BIND_DESC_RCLICK] = "Нажатие правого стика.", [UI_BIND_DESC_L] = "Кнопка L.",
+    [UI_BIND_DESC_R] = "Кнопка R.", [UI_BIND_DESC_ZL] = "Курок ZL.", [UI_BIND_DESC_ZR] = "Курок ZR.",
+    [UI_BIND_DESC_PLUS] = "Пауза, меню.", [UI_BIND_DESC_MINUS] = "Доп. меню.",
+    [UI_BIND_DESC_DPAD] = "Крестовина.",
+    [UI_BIND_DESC_MOVE] = "Двигает Йоши, как левый стик. Левый стик контроллера тоже всегда работает.",
     [UI_BIND_DESC_CAMERA] = "Поворачивает камеру, как правый стик. Мышь и правый стик контроллера тоже всегда "
                             "работают.",
     [UI_KEY_SPACE] = "Пробел", [UI_KEY_TAB] = "Tab", [UI_KEY_LSHIFT] = "Левый Shift", [UI_KEY_LCTRL] = "Левый Ctrl",
@@ -556,8 +560,8 @@ static const char *const text_ru[UI_TEXT_COUNT] = {
 
     [UI_MENU_MENU_LANG] = "Язык меню", [UI_MENU_MENU_LANG_DESC] = "Язык этого меню и индикатора.",
     [UI_MENU_MENU_LANG_AUTO] = "Автоматически (из Windows)",
-    [UI_MENU_THEME] = "Тема меню", [UI_MENU_THEME_DK] = "Donkey Kong", [UI_MENU_THEME_CLASSIC] = "Классическая",
-    [UI_MENU_THEME_DESC] = "Вид этого меню: Donkey Kong (кора и банановый жёлтый) или классический тёмно-зелёный с золотом.",
+    [UI_MENU_THEME] = "Тема меню", [UI_MENU_THEME_YOSHI] = "Yoshi", [UI_MENU_THEME_CLASSIC] = "Классическая",
+    [UI_MENU_THEME_DESC] = "Вид этого меню: Yoshi (сказочный лесной зелёный с золотом) или классический тёмно-зелёный с золотом.",
 
     [UI_MENU_ADV_WARNING] = "Эти настройки нужны для тестов и поиска неполадок. Меняйте их, только если знаете зачем.",
     [UI_MENU_GROUP_SCHED] = "Планирование", [UI_MENU_GROUP_SHADERS] = "Шейдеры и конвейеры",

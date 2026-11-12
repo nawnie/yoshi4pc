@@ -36,9 +36,10 @@ All captures below were recorded at 960x540 (Vulkan swapchain output) after the 
 - **`runtime/ov_system.c`**: Added `nn::account` user listing and open-by-`Uid` (`GetUserCount`, `ListAllUsers`, `ListQualifiedUsers`, `OpenUser`, fallback for `LoadProfileImage`), `nn::aoc::GetAddOnContentListChangedEvent`, `nn::oe` screenshot enable log, and `nn::time::GetDeviceLocationName` / `LoadTimeZoneRule` / `ToCalendarTime`.
 - **`runtime/ov_input.c`**: Added `GetNpadState` overrides for Joy-Con left/right and handheld structs, `GetMouseState`, and `SetGyroscopeZeroDriftMode`.
 
-### Audio & Movie (`runtime/`)
+### Audio, Movie & UI (`runtime/`)
 - **`runtime/audren.c`**: Implemented a paced SDL3 `AudioOut` queue returning PCM16 buffers on schedule (plus a no-device fallback so timing advances).
-- **`runtime/ov_movie.c`, `runtime/movie_avc.h`, `runtime/movie_avc_win.c`**: Implemented Windows Media Foundation H.264 decoding for `movie::Decoder`. Format-4 RGBA title playback works cleanly; see below for Movie 2 format-3 status.
+- **`runtime/ov_movie.c`, `runtime/movie.h`, `runtime/movie_avc.h`, `runtime/movie_avc_win.c`**: Implemented Windows Media Foundation H.264 decoding for `movie::Decoder`. Format-4 RGBA title playback works, and signaling the guest client's `movie::Buffer::GetNvnSync` `NVNsync` after format-3 `NVNtexture *` delivery advances playback through Movie 2 (3,665 frames) into the Stage 1 transition.
+- **`runtime/ui/`, `runtime/ui_text.*`, `runtime/yoshi.ico`, `runtime/totk.rc`, `runtime/cfg.c`, `runtime/gfx_window_*.c`**: Replaced the inherited Donkey Kong Bananza theme (`dk` bark/banana UI, `DKB Recomp` version/title strings, BotW/TotK button hints) with a Yoshi storybook palette (`yoshi` theme default alongside `classic`), a 7-size Yoshi Egg application icon (`runtime/yoshi.ico`), `YoshiRecompWindow` / `yoshi-recomp` window identifiers, complete English/Russian UI strings, and `rt_patch_set` gating (`RT_PATCH_COUNT == 0`) so unsupported patch-dependent settings stay hidden on Yoshi.
 
 ### NVN 2, Shaders & Vulkan (`runtime/`)
 - **`runtime/vk_exec_draw.c` (`bind_program`)**: Fixed a critical bug where per-draw `nvnCommandBufferBindProgram(cmd, NULL, 0x80)` stage-unbind calls zeroed `ex->prog`. Ignoring binds where `!(stages & (NVN_SHADER_STAGE_ALL_GRAPHICS_BITS | NVN_SHADER_STAGE_COMPUTE_BIT))` cut skipped draws from `26–79/frame` to `0/frame`, resolving the white screen and ghosting.
@@ -52,10 +53,12 @@ All captures below were recorded at 960x540 (Vulkan swapchain output) after the 
 
 ## Remaining blockers to reach gameplay
 
-1. **Movie 2 (`New Game` cutscene) format-3 `NVNtexture *` contract stall**
-   - After selecting `New Game` from the profile menu, the story intro H.264 stream configures `1920x1080` using output format `3` (`NVNtexture *`).
-   - Trace logs show `AcquireOutputBufferIndex` + `GetOutputBuffer` called across buffers `0..7` (producing black `px0=0xff000000` across `time=0..233333` us while alternating two `NVNtexture` handles), without `ReleaseOutputBufferIndex` ever being called.
-   - Resolving what the game/SDK expects on format-3 `NVNtexture *` movie frames (NV12/RGBA layout, plane upload/presentation contract, or event/release timing) is the primary progression blocker into gameplay.
+1. **Stage 1 Ampere shader lowering failures (`NVN2Shaders.cpp` abort after Movie 2)**
+   - After Movie 2 finishes, the game compiles Stage 1 shaders. Offline census (`tools/dkb_lower_test.cpp`) of `378` dumped Stage 1 stages lowers `292` (`77.2%`) and fails on `86`:
+     - `76` `native uniform texture mode` (`TEX.SCR` `0xf60` — disassembly shows `TEX.SCR.LB.NODEP` forms with `lod == 2` bias / scheduling flags / non-contiguous writemasks or `RZ` destination),
+     - `6` `unsupported native opcode` (`0x59f` / `0x364`),
+     - `1` each of `native uniform texture gather mode` (`0xf63`), `native shared increment mode` (`0xf8c`), `native uniform shift mode` (`0x899`), and `native warp reduction mode` (`0x3c4`).
+   - Returning `0` (`NVN_FALSE`) from `nvnProgramSetShaders` triggers an intentional UE5 abort inside `NVN2Shaders.cpp` (`nn::diag::detail::Abort`).
 
 2. **Two compute shaders in `program 1217` exceed descriptor storage limit**
    - Compute shaders `e1f058...` and `fddd96...` fail offline and runtime translation (`totk_xlate.exe`) inside `GlobalToStorage.GenerateGuardedStorageOp` with:

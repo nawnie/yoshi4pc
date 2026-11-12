@@ -162,6 +162,7 @@ static void guest_init(void) {
         G.buf_set_data = need("_ZN5movie6Buffer18SetDataAndCapacityEPvm");
         G.buf_base = need("_ZNK5movie6Buffer4BaseEv");
         G.buf_capacity = need("_ZNK5movie6Buffer8CapacityEv");
+        G.buf_nvn_sync = ldr_symbol("_ZNK5movie6Buffer10GetNvnSyncEv");
         G.md_find_int32 = need("_ZNK5movie9MediaData9FindInt32EPKcPi");
         G.md_find_string = need("_ZNK5movie9MediaData10FindStringEPKcPS2_");
         G.md_set_int32 = need("_ZN5movie9MediaData8SetInt32EPKci");
@@ -1001,6 +1002,20 @@ static int get_output(Cpu *c, Movie *m, int index, uint64_t buf) {
         }
         MTRACE("  tex %p %ux%u fmt %#x bgra=%d px0=%#08x", (void *)tex, tex->d.width, tex->d.height,
                (unsigned)tex->d.format, bgra, px0);
+        if (G.buf_nvn_sync) {
+            sync_t *nsync = (sync_t *)(uintptr_t)rt_call(c, G.buf_nvn_sync, 1, buf);
+            if (nsync) {
+                if (nsync->magic != MAGIC('S', 'Y', 'N', 'C'))
+                    rt_log("movie: Buffer::GetNvnSync %p has bad magic %#x", (void *)nsync, nsync->magic);
+                else {
+                    // Format-3 texture delivery already finished synchronously inside write_texels; mark the
+                    // client's NVNsync fenced at 0 so polling nvnSyncWait(..., 0) releases the output index.
+                    nsync->fence = 0;
+                    nsync->fenced = 1;
+                    MTRACE("  signaled NVNsync %p", (void *)nsync);
+                }
+            }
+        }
         buf_set_range(c, buf, 0, (int)cap);
         bytes = (int)cap;
     } else if (st == ST_OK && bytes) {

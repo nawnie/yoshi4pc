@@ -23,10 +23,10 @@ extern "C" {
 void rt_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 }
 
-// The colours of the rows. "classic" is the SavageWindRecomp look the menu started with; "dk" is the jungle-bark and
-// banana palette (menu.cpp style_init has the window colours of both). opt_theme picks one.
+// The colours of the rows. "classic" is the SavageWindRecomp look the menu started with; "yoshi" is the storybook
+// forest-green and Yoshi-emerald palette (menu.cpp style_init has the window colours of both). opt_theme picks one.
 struct Pal {
-    bool dk;
+    bool themed;
     ImU32 gold, dim, grey;
     ImU32 fill_idle, fill_on;                            // row background: idle, hovered or selected
     ImU32 border_idle, border_idle_off, border_on_off;   // row border: idle, idle when greyed out, hovered when greyed out
@@ -43,20 +43,20 @@ static const Pal kClassic = {false, IM_COL32(236, 194, 84, 255), IM_COL32(150, 1
                              IM_COL32(200, 150, 90, 255), IM_COL32(220, 170, 100, 255),
                              IM_COL32(255, 255, 255, 14), IM_COL32(255, 255, 255, 255),
                              ImVec4(0.93f, 0.76f, 0.33f, 1), ImVec4(0.95f, 0.66f, 0.40f, 1)};
-static const Pal kDk = {true, IM_COL32(246, 197, 43, 255), IM_COL32(190, 168, 138, 255), IM_COL32(140, 120, 98, 255),
-                        IM_COL32(0, 0, 0, 70), IM_COL32(246, 197, 43, 34),
-                        IM_COL32(107, 74, 42, 255), IM_COL32(107, 74, 42, 110), IM_COL32(246, 197, 43, 120),
-                        IM_COL32(190, 168, 138, 255), IM_COL32(107, 74, 42, 255),
-                        IM_COL32(243, 233, 210, 255), IM_COL32(231, 214, 184, 255), IM_COL32(255, 244, 214, 255),
-                        IM_COL32(214, 150, 90, 255), IM_COL32(240, 190, 100, 255),
-                        IM_COL32(107, 74, 42, 140), IM_COL32(255, 244, 214, 255),
-                        ImVec4(246 / 255.f, 197 / 255.f, 43 / 255.f, 1), ImVec4(1.0f, 0.54f, 0.46f, 1)};
+static const Pal kYoshi = {true, IM_COL32(106, 224, 76, 255), IM_COL32(166, 188, 174, 255), IM_COL32(118, 136, 124, 255),
+                           IM_COL32(10, 18, 14, 110), IM_COL32(106, 224, 76, 28),
+                           IM_COL32(58, 94, 72, 220), IM_COL32(58, 94, 72, 100), IM_COL32(106, 224, 76, 120),
+                           IM_COL32(166, 188, 174, 255), IM_COL32(62, 102, 78, 255),
+                           IM_COL32(240, 245, 236, 255), IM_COL32(204, 222, 208, 255), IM_COL32(252, 254, 248, 255),
+                           IM_COL32(232, 152, 112, 255), IM_COL32(146, 224, 132, 255),
+                           IM_COL32(58, 94, 72, 130), IM_COL32(244, 248, 240, 255),
+                           ImVec4(246 / 255.f, 208 / 255.f, 86 / 255.f, 1), ImVec4(1.0f, 0.56f, 0.46f, 1)};
 static const Pal *P = &kClassic;
 #define kGold (P->gold)
 #define kDim (P->dim)
 #define kGrey (P->grey)
 
-void opt_theme(bool dk) { P = dk ? &kDk : &kClassic; }
+void opt_theme(bool yoshi) { P = yoshi ? &kYoshi : &kClassic; }
 ImVec4 opt_accent(void) { return P->accent; }
 ImVec4 opt_warn(void) { return P->warn; }
 
@@ -120,7 +120,7 @@ void opt_end(void) {
     avail.y -= g_bottom;
     float gap = 24 * g_scale;
     ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x + gap * 0.5f, p.y), ImVec2(p.x + gap * 0.5f, p.y + avail.y),
-                                        P->divider, P->dk ? 2.0f : 1.0f);
+                                        P->divider, P->themed ? 2.0f : 1.0f);
     ImGui::SetCursorScreenPos(ImVec2(p.x + gap, p.y));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(14 * g_scale, 6 * g_scale));
     ImGui::BeginChild("##desc", ImVec2(0, avail.y), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoNav);
@@ -187,15 +187,15 @@ static int row(const char *key, UiTextId label, UiTextId desc, const RowView &v)
 
     ImDrawList *dl = ImGui::GetWindowDrawList();
     ImFont *font = ImGui::GetFont();
-    float r = (P->dk ? 6 : 9) * g_scale, pad = 16 * g_scale, small = fs * 0.72f;
+    float r = (P->themed ? 7 : 9) * g_scale, pad = 16 * g_scale, small = fs * 0.72f;
     dl->AddRectFilled(p, ImVec2(p.x + w, p.y + h), hov || foc ? P->fill_on : P->fill_idle, r);
     dl->AddRect(p, ImVec2(p.x + w, p.y + h),
                 hov || foc ? (off ? P->border_on_off : kGold) : off ? P->border_idle_off : P->border_idle, r, 0,
-                hov || foc ? (P->dk ? 2.5f * g_scale : 2.0f) : P->dk ? 1.5f * g_scale : 1.0f);
-    if (P->dk) {   // the plank's bevel: a light edge on top, a dark one under
-        dl->AddLine(ImVec2(p.x + r, p.y + 2 * g_scale), ImVec2(p.x + w - r, p.y + 2 * g_scale), IM_COL32(255, 255, 255, 16));
+                hov || foc ? (P->themed ? 2.5f * g_scale : 2.0f) : P->themed ? 1.5f * g_scale : 1.0f);
+    if (P->themed) {
+        dl->AddLine(ImVec2(p.x + r, p.y + 2 * g_scale), ImVec2(p.x + w - r, p.y + 2 * g_scale), IM_COL32(255, 255, 255, 14));
         dl->AddLine(ImVec2(p.x + r, p.y + h - 2 * g_scale), ImVec2(p.x + w - r, p.y + h - 2 * g_scale),
-                    IM_COL32(0, 0, 0, 70));
+                    IM_COL32(0, 0, 0, 55));
     }
     float ty = p.y + fs * 0.25f, ny = p.y + fs * 1.3f;   // the label line and the note line under it
     float right = p.x + w - pad;                         // the value's right edge
@@ -217,11 +217,11 @@ static int row(const char *key, UiTextId label, UiTextId desc, const RowView &v)
     if (v.value[0]) {
         float vx = right - ImGui::CalcTextSize(v.value).x;
         ImU32 vc = off ? kGrey : v.is_default ? P->value_default : P->value_set;
-        if (P->dk && v.pill) {   // green for on, red for off; the text stays white for contrast
+        if (P->themed && v.pill) {   // green for on, muted berry for off; the text stays white for contrast
             float px = fs * 0.5f;
             vx -= px;
             dl->AddRectFilled(ImVec2(vx - px, ty + fs * 0.02f), ImVec2(right, ty + fs * 0.98f),
-                              v.pill == 1 ? IM_COL32(46, 125, 43, off ? 120 : 255) : IM_COL32(168, 42, 32, off ? 120 : 255),
+                              v.pill == 1 ? IM_COL32(46, 148, 62, off ? 120 : 255) : IM_COL32(158, 56, 56, off ? 120 : 255),
                               fs * 0.5f);
             vc = off ? kGrey : IM_COL32(255, 255, 255, 255);
             value_left = vx - px;
@@ -243,12 +243,12 @@ static int row(const char *key, UiTextId label, UiTextId desc, const RowView &v)
                      : m && !m->live ? menu_text(UI_MENU_AFTER_RESTART)
                                      : NULL;
     if (note) dl->AddText(font, small, ImVec2(p.x + pad, ny), off ? P->off_note : kDim, note);
-    if (P->dk && v.frac >= 0) {   // the slider's track with a banana grab, along the row's foot
+    if (P->themed && v.frac >= 0) {   // the slider's track with a Yoshi-green grab, along the row's foot
         float x0 = p.x + pad, x1 = p.x + w - pad, y = p.y + h - 5 * g_scale, gx = x0 + (x1 - x0) * v.frac;
         dl->AddLine(ImVec2(x0, y), ImVec2(x1, y), IM_COL32(0, 0, 0, 140), 3 * g_scale);
         dl->AddLine(ImVec2(x0, y), ImVec2(gx, y), off ? kGrey : kGold, 3 * g_scale);
         dl->AddCircleFilled(ImVec2(gx, y), 5.5f * g_scale, off ? kGrey : kGold);
-        dl->AddCircle(ImVec2(gx, y), 5.5f * g_scale, IM_COL32(42, 26, 14, 255), 0, 1.5f * g_scale);
+        dl->AddCircle(ImVec2(gx, y), 5.5f * g_scale, IM_COL32(16, 26, 22, 255), 0, 1.5f * g_scale);
     }
     ImGui::PopID();
     return off ? 0 : step;
@@ -416,7 +416,7 @@ int opt_bind_row(const char *key, const char *label, UiTextId desc, const char *
     float fs = ImGui::GetFontSize(), w = ImGui::GetContentRegionAvail().x, h = floorf(fs * 1.9f), cx[3], cw;
     bind_columns(p.x, w, cx, &cw);
     ImDrawList *dl = ImGui::GetWindowDrawList();
-    float r = (P->dk ? 6 : 8) * g_scale, pad = 6 * g_scale;
+    float r = (P->themed ? 7 : 8) * g_scale, pad = 6 * g_scale;
     fit_text(dl, p.x + 16 * g_scale, cx[0] - fs * 0.3f, p.y, h, P->label, label, false);
     int result = -1;
     bool row_foc = false, row_hov = false;

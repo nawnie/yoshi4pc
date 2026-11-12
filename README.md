@@ -8,7 +8,7 @@
 > **Research only. No game assets are included in this repository.** It contains no game containers, keys, extracted game files, game footage, or compiled game binaries. You must provide your own legally obtained game dump to build or run it.
 
 > [!NOTE]
-> **Project Status (Pre-Gameplay WIP):** Boots through startup, plays the H.264 format-4 intro island movie via Windows Media Foundation, renders the title screen (`Ver. 1.0.2`) and animated profile menu (`41.3–42.4 fps`, `0` skipped draws/frame), and opens the local offline profile. Gameplay does not start yet due to the Movie 2 format-3 `NVNtexture *` cutscene stall after selecting `New Game`. See [docs/yoshi-status.md](docs/yoshi-status.md).
+> **Project Status (Pre-Gameplay WIP):** Boots through startup, plays both the H.264 format-4 intro island movie and the format-3 (`NVNtexture *`) story cutscene via Windows Media Foundation, renders the title screen (`Ver. 1.0.2`), animated profile menu (`41.3–42.4 fps`, `0` skipped draws/frame), and Yoshi-themed in-game settings overlay, and opens the local offline profile. Gameplay does not start yet due to Stage 1 Ampere shader lowering failures (`NVN2Shaders.cpp` abort on `86` of `378` captured Stage 1 shaders, led by `TEX.SCR` `0xf60`). See [docs/yoshi-status.md](docs/yoshi-status.md).
 
 ---
 
@@ -22,7 +22,9 @@
 | Kernel, FS directory listing, IPC domains (`bsd`/`ssl`/`fsp-srv`) | Working | Boots offline with single local user (`nn::account`, `nn::time`, `nn::fs`) |
 | SDL3 `AudioOut` pacer + H.264 format-4 movie playback | Working | Plays intro island movie via Media Foundation (`runtime/movie_avc_win.c`) |
 | Title & profile rendering (`Vulkan` + `NVN 2` + Ampere lowering) | Working | Fixed `OP_BIND_PROGRAM` `0x80` unbind (`0` skipped draws/frame at `41.3–42.4 fps`) |
-| Cutscene Movie 2 (`format 3` `NVNtexture *`) on `New Game` | **Blocked** | `AcquireOutputBufferIndex` / `GetOutputBuffer` loop produces black frames and never calls `ReleaseOutputBufferIndex` |
+| In-game settings UI & window icon (`runtime/ui/`, `runtime/yoshi.ico`) | Working | Replaced inherited DKB bark UI with Yoshi storybook forest-green palette, Yoshi Egg icon, `Yoshi Recomp` strings/versioning, and `RT_PATCH_COUNT` gating for unavailable patch toggles |
+| Cutscene Movie 2 (`format 3` `NVNtexture *`) on `New Game` | Working | Signaling `movie::Buffer::GetNvnSync` `NVNsync` in `runtime/ov_movie.c` completes playback and advances into Stage 1 shader compilation |
+| Stage 1 Ampere shader lowering (`nvn2_lower` / `lower_to_maxwell.h`) | **Blocked** | `292 / 378` captured Stage 1 shaders lower (`77.2%`); `86` fail (`76` `TEX.SCR` `0xf60` `native uniform texture mode`, `6` unsupported opcodes, `4` other mode checks), causing UE5 `NVN2Shaders.cpp` to abort |
 | Compute shaders in `program 1217` (`e1f058...`, `fddd96...`) | **Open** | `totk_xlate.exe` hits `NotSupportedException: Storage candidates exceed the descriptor resource limit` (`disp nosh=2`) |
 
 Full engineering notes live in [docs/yoshi-status.md](docs/yoshi-status.md).
