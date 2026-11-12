@@ -1,0 +1,17 @@
+# Example local configuration (never commit paths or keys).
+# For Yoshi and the Mysterious Book (.nup workflow), extract directly with:
+#   python tools/extract_nup.py <path-to-game>.nup --select latest --out build/extracted/yoshi131072
+# and pass --version yoshi131072 --expected tools/data/expected-yoshi131072.json to build_game.py.
+
+[input]
+# Title ID (Yoshi and the Mysterious Book): 0400245021D2C000
+nup = 'C:\Games\Yoshi\yoshi.nup'
+
+# Optional Switch 1 / upstream TotK extraction fields used by tools/extract.py
+base = ''
+updates = []
+keys = 'C:\Switch\prod.keys'
+
+[work]
+# Extracted files, generated C and builds go here (ignored by git).
+dir = 'build'

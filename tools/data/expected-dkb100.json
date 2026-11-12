@@ -1,0 +1,11 @@
+{
+  "_comment": "Donkey Kong Bananza 1.0.0 ExeFS. Hashes only; no game data.",
+  "title_id": "040074A01BF12000",
+  "display_version": "1.0.0",
+  "exefs_sha256": {
+    "main": "885b4bdd17071cc5ebbc260f6be82b3b947d12545529f0093ed13c07debcdf47",
+    "main.npdm": "bacfe08180264fc9918d92abe40cb439751838bc807c4e7ef5bb79d413690386",
+    "rtld": "34777deb0379a9e43d7369bf5f993768c8086675c47159d826d5311dacbdf9b8",
+    "sdk": "214ebee26515c681917acccaf3eec5ca769851645c964f61f6f6fa153cf4786f"
+  }
+}

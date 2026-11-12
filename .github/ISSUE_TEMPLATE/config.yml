@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Current progress & known blockers
+    url: ../../blob/main/docs/yoshi-status.md
+    about: Verified bring-up milestones and the open issues blocking gameplay.
+  - name: Building from source
+    url: ../../blob/main/README.md
+    about: Prerequisites, extraction from your own .nup, lifting, and compile steps.

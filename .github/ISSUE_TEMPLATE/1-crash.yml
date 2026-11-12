@@ -1,0 +1,50 @@
+name: Crash
+description: The game closes, freezes, shows a FATAL message, or loses the GPU.
+labels: [bug, crash]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `yoshi4pc` is experimental and does not reach gameplay yet (`docs/yoshi-status.md`). A focused crash report helps isolate the next runtime or shader blocker.
+
+        Do not attach or link `.nup` files, ExeFS/RomFS dumps, keys, firmware, generated C, compiled binaries, or shader caches.
+  - type: input
+    id: version
+    attributes:
+      label: Commit
+      description: Output of `git rev-parse --short HEAD` (expected target is Ver. 1.0.2 / title version 131072).
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: GPU, driver, and OS
+      description: For example "Radeon RX 7800 XT, Adrenalin 25.10.1, Windows 11 24H2".
+    validations:
+      required: true
+  - type: dropdown
+    id: when
+    attributes:
+      label: When does it happen?
+      options:
+        - At startup, before any picture
+        - During intro island movie (format 4)
+        - Title logo / start screen / profile select
+        - Starting "New Game" / cutscene movie (format 3)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps and environment variables
+      description: Fresh profile or existing save, controller/keyboard input, and any YOSHI_* / DKB_* / TOTK_* flags set.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Attach relevant excerpts from `logs\yoshi.log` next to `yoshi.exe`. Copy it before restarting the game.
+    validations:
+      required: true

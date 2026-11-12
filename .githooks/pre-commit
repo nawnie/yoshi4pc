@@ -1,0 +1,6 @@
+#!/bin/sh
+# Enable once per clone: git config core.hooksPath .githooks
+if command -v python3 >/dev/null 2>&1; then
+    exec python3 tools/check_content.py --staged
+fi
+exec python tools/check_content.py --staged

@@ -1,0 +1,5 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+// SMAA low preset (runtime/vk_smaa.c); the pass is in smaa/edges.glsl
+#define SMAA_PRESET_LOW 1
+#include "smaa/edges.glsl"

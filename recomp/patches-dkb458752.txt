@@ -1,0 +1,91 @@
+# Code patches for Donkey Kong Bananza 458752 main (recomp/patches.py), ported from dkb100 by
+# tools/port_patches.py. Each original word is checked against main. Offsets inside comments, and
+# "[1.0.0 xxx]" tags, are dkb100 addresses. hidproxy is gone: the controller constructor calls
+# InitializeNpad directly (main+0x758650, a 458752 address) and the host overrides that.
+
+
+# Experimental host-paced frame timing. The controller's common exit passes the
+# measured simulation rate from patch page +12 to the framework. Opt-in until
+# physics, camera and cutscene timing have been qualified across frame rates.
+# x8 is dead here: 1ead28 calls 1eaf30, whose first instruction writes w8 before
+# reading it. Keep the controller's present interval at +0x40 and its original
+# load at 1ead2c; nvn_api_obj.c present_period uses the host cap with realtime on.
+set realtime TOTK_REALTIME 0
+site realtime main 204a54 aa1303e0 @page:x8 b9400d01 b9005281 b9005681 aa1303e0  # 1.0.0 1ead24
+
+# Clock producers divide 60 by the controller's integer FPS. Read the precise
+# 60 Hz step at +8 instead. Preserve the address register, stack and flags; the
+# original time-scale multipliers, pause checks and seconds conversions remain.
+site realtime main 1c8c9c 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # 1.0.0 1bc834
+site realtime main 2f2928 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # global and scene step  [1.0.0 2d9fc8]
+site realtime main 2f2a80 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # seconds producer divides by 60 next  [1.0.0 2da120]
+site realtime main 372060 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # actor and camera clock  [1.0.0 34e99c]
+site realtime main 3722e0 1e201828 f81f0fe9 @page:x9 bd400928 f84107e9  # same clock with game time scale  [1.0.0 34ec1c]
+site realtime main 37232c 1e201860 f81f0fe9 @page:x9 bd400920 f84107e9  # time-scale transition  [1.0.0 34ec68]
+site realtime main 6b8260 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # secondary scene clock  [1.0.0 69fc60]
+
+# The radial blur entries a smash starts (crystal bananas, the intro rock) count their lifetime in whole 60 Hz frames:
+# each frame subtracts fcvtzs(step) from [x22-4], the step being the update info's +0x40 or +0x44. A step under 1.0
+# (any rate above 60 fps) truncates to 0, so the entry was never released and its blur stayed on screen (#158).
+# runtime/frame_rate.c blur_frames (patch page +0x250) keeps the fraction per entry and returns the whole frames in w8.
+# The function saves LR in its prologue (main+426e94), so the BL keeps its return.
+site realtime main 426f54 1e380008 948fa4bf  # fcvtzs w8, s0 in the blur entry update  [3.2.0 only]
+
+# Optional Bananza virtual display and camera aspect. Values are supplied by
+# runtime/dkb_wide.c at page +0x100 (width), +0x104 (height), +0x108 (aspect),
+# +0x10c (aspect / 16:9), +0x110 (render-target pool bytes).
+set dkbwide DKB_ULTRAWIDE 0
+
+# al::getVirtualDisplayWidth / Height. The retail base uses 2880 by 1620.
+site dkbwide main 5bf770 52816800 @page:x0 b9410000  # 1.0.0 5ad9f0
+site dkbwide main 5bf780 5280ca80 @page:x0 b9410400  # 1.0.0 5ada00
+
+# Framework init sets the 200 MiB render-target pool size, 0xc800000, into a field of its init argument. A larger
+# output overflows that pool (issue 152): take the size from page +0x110. x9 is overwritten right after the store.
+site dkbwide main 53995c 52a19009 @page:x9 b9411129  # 1.0.0 458adc
+
+# al::CameraPoseUpdater constructor, the default perspective aspect at +0x100.
+# The following MOVK preserves the original upper packed FOV word.
+site dkbwide main 462504 f2a7fc68 @page:x8 b9410908  # 1.0.0 522e44
+
+# Scene camera initialization replaces the constructor aspect through this setter.
+# Scale the supplied aspect so the camera keeps its own framing and split views.
+# s8 is restored immediately afterwards; s16 and x8 are caller-saved scratch.
+site dkbwide main 45d5d4 bd010008 @page:x8 bd410d10 1e300910 bd010010  # 1.0.0 51e0c4
+
+# Widen fresh UI projections before DrawInfo::SetProjectionMtx copies them.
+# The first matrix row maps authored layout x to clip space. Saved projections
+# are restored through the same setter, so changing the setter would repeatedly
+# narrow the HUD. These four sites copy a newly computed sead projection into
+# temporary storage instead. Keep the other matrix rows and all scratch intact.
+# main+ea8a0 also projects local layout captures (dialogue backgrounds, text
+# effects and icon shadows). Those textures retain their authored dimensions.
+# Only widen its full 1920x1080 canvas: m00 == 2/1920 and m11 == 2/1080.
+# Compare both lanes, broadcast their combined mask, and BSL the widened row
+# against the original. This leaves capture rows bit-identical, preserves NZCV,
+# and restores x8 and q16-q19 from the 80-byte temporary stack frame.
+site dkbwide main b1260 9400002d adbf47f0 adbf4ff2 f81f0fe8 3dc00030 bd401431 52911128 72a75108 1e270112 4e32e612 52973ac8 72a75e48 1e270113 4e33e633 4e331e52 4e040652 @page:x8 bd410d11 4e040631 6e31fe11 6e701e32 3d800032 f84107e8 acc14ff2 acc147f0 9400002d  # 1.0.0 ea8a0
+site dkbwide main 45f9dc 97f1464e adbf47f0 f81f0fe8 @page:x8 3dc00030 bd410d11 4e040631 6e31fe10 3d800030 f84107e8 acc147f0 97f1464e  # 1.0.0 52047c
+site dkbwide main 803c94 97e2b5a0 adbf47f0 f81f0fe8 @page:x8 3dc00030 bd410d11 4e040631 6e31fe10 3d800030 f84107e8 acc147f0 97e2b5a0  # 1.0.0 7ec2ec
+site dkbwide main 170e2f4 97a68c08 adbf47f0 f81f0fe8 @page:x8 3dc00030 bd410d11 4e040631 6e31fe10 3d800030 f84107e8 acc147f0 97a68c08  # 1.0.0 15209d4
+
+set mousecamera TOTK_MOUSE_CAMERA 0
+
+# CameraPoserFollowLimit's manual yaw update and CameraAngleVerticalCtrl::exeUserCtrl.
+# Keep each original instruction, then call the host adapter in runtime/dkb_camera.c. The five
+# dispatch addresses are outside main, at patch page +0x200/+0x210/+0x220/+0x230/+0x240. These functions
+# save LR in their prologues and restore it after the sites, so the inserted BL preserves returns.
+# All seven BL immediates below assume the patch page is at main+0x2810000 (recomp/layout.py).
+site mousecamera main 4385fc f9405808 f9405808 948f5f01  # yaw begin: x0 is the follow camera  [1.0.0 41b35c]
+site mousecamera main 438780 6d42a3e9 6d42a3e9 948f5ea4  # yaw end: x19 is the follow camera  [1.0.0 41b4e0]
+site mousecamera main 80a1a0 f000e254 f000e254 94801820  # pitch begin: x19 is the vertical controller  [1.0.0 7f209c]
+site mousecamera main 80a3fc 6d42a3e9 6d42a3e9 9480178d  # pitch end: x19 is the vertical controller  [1.0.0 7f22f8]
+
+# Let vertical mouse activity interrupt the same waiting states as stick input.
+site mousecamera main 5e949c 2d4e0660 2d4e0660 94889b69  # Interp manual input check  [1.0.0 5ef070]
+site mousecamera main 192b690 bd407260 bd407260 943b92ec  # SnapEnd manual input check  [1.0.0 17357c0]
+# AcceptRequest loads s0 from [x0, #0x70] at 1735878, before the kept mov x19, x0.
+# The comparisons at 1735884 and 1735898 consume that value against -0.15 and +0.15
+# without reloading it. runtime/dkb_camera.c pitch_activity sets s0=1 only for matching
+# vertical mouse activity, taking the native activity branch at 173589c to 17358c8.
+site mousecamera main 192b74c aa0003f3 aa0003f3 943b92bd  # AcceptRequest manual input check  [1.0.0 173587c]

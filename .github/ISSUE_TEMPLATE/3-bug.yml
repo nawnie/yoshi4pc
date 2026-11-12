@@ -1,0 +1,50 @@
+name: Bug report
+description: Building, audio, controls, movies, saves, performance, or host runtime behavior.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach `.nup` files, ExeFS/RomFS dumps, keys, generated C, compiled binaries, or shader caches.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Building from source
+        - Audio
+        - Controls and input
+        - Movies (format 3 / format 4)
+        - Saves and account/profile
+        - Performance and stutter
+        - Lifter / codegen (`recomp/`)
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit
+      description: Output of `git rev-parse --short HEAD`.
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: GPU, driver, and OS
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: What happened and how to reproduce it
+      description: For build failures, include the exact command and trailing error output.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Attach relevant excerpts from `logs\yoshi.log` next to `yoshi.exe`, if the binary launched.
+    validations:
+      required: false

@@ -1,0 +1,24 @@
+// SMAA 1x, the neighbourhood blending pass: our code around the MIT SMAA.hlsl.
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) uniform sampler2D colorTex;
+layout(set = 0, binding = 1) uniform sampler2D blendTex;
+layout(set = 0, binding = 3, rgba16f) uniform writeonly image2D dst;
+
+layout(push_constant) uniform Params {
+    vec4 metrics;
+} pc;
+
+#define SMAA_RT_METRICS pc.metrics
+#define SMAA_GLSL_4 1
+#define discard return float2(0.0, 0.0)
+#include "SMAA.hlsl"
+
+void main() {
+    ivec2 p = ivec2(gl_GlobalInvocationID.xy);
+    if (p.x >= int(pc.metrics.z) || p.y >= int(pc.metrics.w)) return;
+    vec2 uv = (vec2(p) + 0.5) * pc.metrics.xy;
+    vec4 offset;
+    SMAANeighborhoodBlendingVS(uv, offset);
+    imageStore(dst, p, vec4(SMAANeighborhoodBlendingPS(uv, offset, colorTex, blendTex).rgb, 1.0));
+}

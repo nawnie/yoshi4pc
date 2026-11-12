@@ -1,0 +1,37 @@
+name: Graphics glitch
+description: Missing or broken rendering, wrong textures or colors, flicker, black screen, or ghosting.
+labels: [bug, graphics]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check [docs/yoshi-status.md](../../blob/main/docs/yoshi-status.md) first for known rendering and shader issues (for example the two `program 1217` compute shaders hitting the 32-candidate storage limit, or the Movie 2 format-3 `NVNtexture *` black buffers).
+
+        Do not attach `.nup` files, ExeFS/RomFS dumps, keys, raw SPIR-V/ISA dumps, or shader caches.
+  - type: input
+    id: version
+    attributes:
+      label: Commit
+      description: Output of `git rev-parse --short HEAD`.
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: GPU, driver, and OS
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What looks wrong, where, and when
+      description: Scene, draw/dispatch counts from log, and whether it happens on a fresh run.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Attach relevant excerpts from `logs\yoshi.log` (for example `nvn`, `shader`, `movie`, or frame summary lines).
+    validations:
+      required: true

@@ -1,0 +1,113 @@
+# Code patches for Donkey Kong Bananza 1.0.0 main (recomp/patches.py). Each original word is checked against main.
+
+set hidproxy DKB_SKIP_HID_PROXY 1
+
+# al::GameFrameworkOunce::createControllerMgr (main+0x73b300) reaches sub_71008725E0 through main+0x73be90: it makes
+# a transfer memory and talks to IHidServer itself (nn::hid::server::CreateHidServerProxy), past the nn::hid calls the
+# host takes over, and aborts on a failed Result. The host serves no "hid" IPC service, so the call reports success.
+site hidproxy main 73bea0 9404d9d0 2a1f03e0   # bl sub_71008725E0 -> mov w0, wzr
+
+# Experimental host-paced frame timing. The controller's common exit passes the
+# measured simulation rate from patch page +12 to the framework. Opt-in until
+# physics, camera and cutscene timing have been qualified across frame rates.
+# x8 is dead here: 1ead28 calls 1eaf30, whose first instruction writes w8 before
+# reading it. Keep the controller's present interval at +0x40 and its original
+# load at 1ead2c; nvn_api_obj.c present_period uses the host cap with realtime on.
+set realtime TOTK_REALTIME 0
+site realtime main 1ead24 aa1303e0 @page:x8 b9400d01 b9005281 b9005681 aa1303e0
+
+# Clock producers divide 60 by the controller's integer FPS. Read the precise
+# 60 Hz step at +8 instead. Preserve the address register, stack and flags; the
+# original time-scale multipliers, pause checks and seconds conversions remain.
+site realtime main 1bc834 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9
+site realtime main 2d9fc8 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # global and scene step
+site realtime main 2da120 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # seconds producer divides by 60 next
+site realtime main 34e99c 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # actor and camera clock
+site realtime main 34ec1c 1e201828 f81f0fe9 @page:x9 bd400928 f84107e9  # same clock with game time scale
+site realtime main 34ec68 1e201860 f81f0fe9 @page:x9 bd400920 f84107e9  # time-scale transition
+site realtime main 69fc60 1e201820 f81f0fe9 @page:x9 bd400920 f84107e9  # secondary scene clock
+
+# Optional Bananza virtual display and camera aspect. Values are supplied by
+# runtime/dkb_wide.c at page +0x100 (width), +0x104 (height), +0x108 (aspect),
+# +0x10c (aspect / 16:9), +0x110 (render-target pool bytes).
+set dkbwide DKB_ULTRAWIDE 0
+
+# al::getVirtualDisplayWidth / Height. The retail base uses 2880 by 1620.
+site dkbwide main 5ad9f0 52816800 @page:x0 b9410000
+site dkbwide main 5ada00 5280ca80 @page:x0 b9410400
+
+# Framework init (f_7000458a88) sets the 200 MiB render-target pool size, 0xc800000, into a
+# field of its init argument. A larger output overflows that pool (issue 152): take the
+# size from page +0x110. x9 is overwritten right after it is stored, so it is free scratch.
+site dkbwide main 458adc 52a19009 @page:x9 b9411129
+
+# al::CameraPoseUpdater constructor, the default perspective aspect at +0x100.
+# The following MOVK preserves the original upper packed FOV word.
+site dkbwide main 522e44 f2a7fc68 @page:x8 b9410908
+
+# Scene camera initialization replaces the constructor aspect through this setter.
+# Scale the supplied aspect so the camera keeps its own framing and split views.
+# s8 is restored immediately afterwards; s16 and x8 are caller-saved scratch.
+site dkbwide main 51e0c4 bd010008 @page:x8 bd410d10 1e300910 bd010010
+
+# Widen fresh UI projections before DrawInfo::SetProjectionMtx copies them.
+# The first matrix row maps authored layout x to clip space. Saved projections
+# are restored through the same setter, so changing the setter would repeatedly
+# narrow the HUD. These four sites copy a newly computed sead projection into
+# temporary storage instead. Keep the other matrix rows and all scratch intact.
+# main+ea8a0 also projects local layout captures (dialogue backgrounds, text
+# effects and icon shadows). Those textures retain their authored dimensions.
+# Only widen its full 1920x1080 canvas: m00 == 2/1920 and m11 == 2/1080.
+# Compare both lanes, broadcast their combined mask, and BSL the widened row
+# against the original. This leaves capture rows bit-identical, preserves NZCV,
+# and restores x8 and q16-q19 from the 80-byte temporary stack frame.
+site dkbwide main ea8a0 9400002d adbf47f0 adbf4ff2 f81f0fe8 3dc00030 bd401431 52911128 72a75108 1e270112 4e32e612 52973ac8 72a75e48 1e270113 4e33e633 4e331e52 4e040652 @page:x8 bd410d11 4e040631 6e31fe11 6e701e32 3d800032 f84107e8 acc14ff2 acc147f0 9400002d
+site dkbwide main 52047c 97ef2936 adbf47f0 f81f0fe8 @page:x8 3dc00030 bd410d11 4e040631 6e31fe10 3d800030 f84107e8 acc147f0 97ef2936
+site dkbwide main 7ec2ec 97e3f99a adbf47f0 f81f0fe8 @page:x8 3dc00030 bd410d11 4e040631 6e31fe10 3d800030 f84107e8 acc147f0 97e3f99a
+site dkbwide main 15209d4 97af27e0 adbf47f0 f81f0fe8 @page:x8 3dc00030 bd410d11 4e040631 6e31fe10 3d800030 f84107e8 acc147f0 97af27e0
+
+set mousecamera TOTK_MOUSE_CAMERA 0
+
+# CameraPoserFollowLimit's manual yaw update and CameraAngleVerticalCtrl::exeUserCtrl.
+# Keep each original instruction, then call the host adapter in runtime/dkb_camera.c. The five
+# dispatch addresses are outside main, at patch page +0x200/+0x210/+0x220/+0x230/+0x240. These functions
+# save LR in their prologues and restore it after the sites, so the inserted BL preserves returns.
+# All seven BL immediates below assume the patch page is at main+0x2450000 (recomp/layout.py).
+site mousecamera main 41b35c f9405808 f9405808 9480d3a9   # yaw begin: x0 is the follow camera
+site mousecamera main 41b4e0 6d42a3e9 6d42a3e9 9480d34c   # yaw end: x19 is the follow camera
+site mousecamera main 7f209c d000cdb4 d000cdb4 94717861   # pitch begin: x19 is the vertical controller
+site mousecamera main 7f22f8 6d42a3e9 6d42a3e9 947177ce   # pitch end: x19 is the vertical controller
+
+# Let vertical mouse activity interrupt the same waiting states as stick input.
+site mousecamera main 5ef070 2d4e0660 2d4e0660 94798474   # Interp manual input check
+site mousecamera main 17357c0 bd407260 bd407260 94346aa0   # SnapEnd manual input check
+# AcceptRequest loads s0 from [x0, #0x70] at 1735878, before the kept mov x19, x0.
+# The comparisons at 1735884 and 1735898 consume that value against -0.15 and +0.15
+# without reloading it. runtime/dkb_camera.c pitch_activity sets s0=1 only for matching
+# vertical mouse activity, taking the native activity branch at 173589c to 17358c8.
+site mousecamera main 173587c aa0003f3 aa0003f3 94346a71   # AcceptRequest manual input check
+
+
+# Layer changes (#126). The parallel loop main+0x410680 walks a list of entries, each naming a cell of a 3D grid (a
+# 0x4f58-byte object whose address comes from the entry's id through the owner's layer table, owner+0x488), and makes a
+# devirtualised call on the cell. While a layer hands over to the next one (Lagoon to Hilltop, Hilltop to Canyon,
+# Canyon to Branch, Branch to Forest), dozens of its 4,500 entries and of the cells they name hold reused memory:
+# float data as an id (0x3f7fff58), a layer the table does not have, a cell never constructed (vtable 0), a "cell"
+# inside main's code, a cell whose own pointers (+0x48, +0x4f10) are garbage. Without these guards the game crashes
+# in this loop at every one of those transitions (17 of 17 runs at the first one). Why the memory is reused while the
+# list still names it is not known; these are workarounds that keep such an entry out of the loop's work, each through
+# a path of the loop itself:
+#   410df0: the layer record from the table load at 410dec, before its fields are read -> next entry (410d4c). The
+#           loop caches the last entry's id at [x29-0x2c] together with the record in x9; the guard sets that id to -1,
+#           so the next entry looks its record up again instead of reusing the bad one.
+#   41075c: the cell, before an entry flagged in bit 31 branches to 410eb8 (tbnz at 410764) and before its vtable slot
+#           +0x10 is loaded and compared or called at 410768 (only the fall-through reaches it) -> next entry.
+#   410ee0: the cell's +0x48 on the bit-31 path; 410edc already sends a null one to 41164c -> 41164c.
+#   410794: the cell's element array (+0x4f10, loaded at 410790) -> 410e54, the path of an index past the cell's count.
+# Every failed check is logged (runtime/patches.c guard_fail). Opt-out: DKB_FIX_POOL_GUARD=0. 1.0.0 only: update 3.2.0
+# (patches-dkb458752.txt) has no such guards yet.
+set poolguard DKB_FIX_POOL_GUARD 1
+guard poolguard main 410df0 410d4c ptr x9 f9401927 st32 x29 -2c ffffffff
+guard poolguard main 41075c 410d4c vcall x9 b940028a
+guard poolguard main 410ee0 41164c ptr x20 aa1403e0
+guard poolguard main 410794 410e54 ptr x10 f875794a

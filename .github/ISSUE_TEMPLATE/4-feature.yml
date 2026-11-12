@@ -1,0 +1,18 @@
+name: Improvement / task proposal
+description: Propose a fix or feature for yoshi4pc.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: request
+    attributes:
+      label: What you want to change and why
+    validations:
+      required: true
+  - type: dropdown
+    id: help
+    attributes:
+      label: Would you work on it?
+      options:
+        - "Yes, I would like to send a pull request"
+        - "I can help test it"
+        - "No"
