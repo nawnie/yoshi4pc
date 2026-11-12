@@ -2,7 +2,7 @@
 
 **Research project:** experimental static recompilation of *Yoshi and the Mysterious Book* (Nintendo Switch 2, ARM64, **Ver. 1.0.2** / title ID `0400245021D2C000`, title version `131072`) into a native Windows x86-64 executable (`yoshi.exe`) with a Vulkan renderer.
 
-Forked from [`dkb-pc-recomp`](https://github.com/Lucas-blip-png/dkb-pc-recomp) (itself built on [`totk-pc-recomp`](https://github.com/valentderah/totk-pc-recomp)).
+**Upstream credit:** This project is a derivative fork of [DKB Recomp](https://github.com/Lucas-blip-png/dkb-pc-recomp), created by [Lucas-blip-png](https://github.com/Lucas-blip-png). We adapted its Switch 2 recompilation work for *Yoshi and the Mysterious Book*. DKB Recomp itself builds on [TotK Recomp](https://github.com/valentderah/totk-pc-recomp). We are grateful for this upstream work; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the base commit and component-level credits. This project retains the applicable GPL-3.0-or-later terms.
 
 > [!IMPORTANT]
 > **Research only. No game assets are included in this repository.** It contains no game containers, keys, extracted game files, game footage, or compiled game binaries. You must provide your own legally obtained game dump to build or run it.
